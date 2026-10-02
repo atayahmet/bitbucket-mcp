@@ -256,7 +256,7 @@ class BitbucketServer {
         {
           name: "add_pull_request_comment",
           description:
-            "Add a comment to a pull request. Can be a general comment or an inline comment on a specific file/line.",
+            "Add a comment to a pull request. Can be a general comment, an inline comment on a specific file/line, or a reply to an existing comment (parent_id).",
           inputSchema: {
             type: "object",
             properties: {
@@ -275,13 +275,19 @@ class BitbucketServer {
                 type: "number",
                 description: "Line number for inline comment (optional)",
               },
+              parent_id: {
+                type: "number",
+                description:
+                  "ID of the comment to reply to (optional). The reply is threaded under it.",
+              },
             },
             required: ["workspace", "repo_slug", "pr_id", "body"],
           },
         },
         {
           name: "resolve_pull_request_comment",
-          description: "Resolve or unresolve a pull request comment",
+          description:
+            "Resolve a pull request comment thread (resolved: true, default) or reopen it (resolved: false)",
           inputSchema: {
             type: "object",
             properties: {
@@ -615,6 +621,7 @@ class BitbucketServer {
                       args?.pr_id as number,
                       args?.body as string,
                       inline,
+                      args?.parent_id as number | undefined,
                     ),
                     null,
                     2,

@@ -207,13 +207,18 @@ export class BitbucketClient {
     repo_slug: string,
     pr_id: number,
     body: string,
-    inline?: { path: string; line: number }
+    inline?: { path: string; line: number },
+    parent_id?: number
   ): Promise<BitbucketComment> {
     const data: any = {
       content: { raw: body },
     };
     if (inline) {
       data.inline = { path: inline.path, to: inline.line };
+    }
+    // A reply: Bitbucket threads it under the parent (and inherits the parent's inline anchor).
+    if (parent_id !== undefined) {
+      data.parent = { id: parent_id };
     }
     const response = await this.client.post(
       `/repositories/${workspace}/${repo_slug}/pullrequests/${pr_id}/comments`,
@@ -228,12 +233,16 @@ export class BitbucketClient {
     pr_id: number,
     comment_id: number,
     resolved: boolean = true
-  ): Promise<BitbucketComment> {
-    const response = await this.client.put(
-      `/repositories/${workspace}/${repo_slug}/pullrequests/${pr_id}/comments/${comment_id}`,
-      { resolved }
-    );
-    return response.data;
+  ): Promise<unknown> {
+    // Resolution is its own sub-resource: POST resolves, DELETE reopens. A PUT of `{ resolved }` on
+    // the comment itself is rejected with 400.
+    const url = `/repositories/${workspace}/${repo_slug}/pullrequests/${pr_id}/comments/${comment_id}/resolve`;
+    if (resolved) {
+      const response = await this.client.post(url);
+      return response.data;
+    }
+    await this.client.delete(url);
+    return { comment_id, resolved: false };
   }
 
   async reactToPullRequestComment(

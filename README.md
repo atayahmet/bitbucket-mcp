@@ -152,8 +152,8 @@ claude mcp add bitbucket \
 | `get_pull_request_diff`                      | Get the raw diff output of a pull request                                       |
 | `get_pull_request_diffstat`                  | Get a summary of changed files in a pull request (lines added/removed)          |
 | `list_pull_request_comments`                 | List all comments on a pull request                                             |
-| `add_pull_request_comment`                   | Add a general or inline comment to a pull request (Markdown supported)          |
-| `resolve_pull_request_comment`               | Resolve or unresolve a pull request comment                                     |
+| `add_pull_request_comment`                   | Add a general or inline comment, or a threaded reply (`parent_id`) (Markdown)   |
+| `resolve_pull_request_comment`               | Resolve a comment thread, or reopen it with `resolved: false`                   |
 | `react_to_pull_request_comment`              | Add a reaction (e.g. thumbsup) to a pull request comment                        |
 | `remove_reaction_from_pull_request_comment`  | Remove a reaction from a pull request comment                                   |
 | `approve_pull_request`                       | Approve a pull request                                                          |
