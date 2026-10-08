@@ -173,7 +173,8 @@ class BitbucketServer {
         },
         {
           name: "list_pull_requests",
-          description: "List pull requests in a repository",
+          description:
+            "List pull requests in a repository: a summary of each (id, title, description, state, author, branches, dates, comment and task counts). get_pull_request has the rest.",
           inputSchema: {
             type: "object",
             properties: {
@@ -183,6 +184,12 @@ class BitbucketServer {
                 type: "string",
                 enum: ["OPEN", "MERGED", "DECLINED", "SUPERSEDED"],
                 default: "OPEN",
+              },
+              limit: {
+                type: "number",
+                default: 20,
+                description:
+                  "Maximum number of pull requests to return, most recently updated first",
               },
             },
             required: ["workspace", "repo_slug"],
@@ -216,7 +223,8 @@ class BitbucketServer {
         },
         {
           name: "get_pull_request_diff",
-          description: "Get the raw diff of a pull request",
+          description:
+            "Get the raw diff of a pull request: the changes it makes (its source against the merge base with the destination)",
           inputSchema: {
             type: "object",
             properties: {
@@ -236,6 +244,38 @@ class BitbucketServer {
               workspace: { type: "string" },
               repo_slug: { type: "string" },
               pr_id: { type: "number", description: "Pull request ID" },
+            },
+            required: ["workspace", "repo_slug", "pr_id"],
+          },
+        },
+        {
+          name: "list_pull_request_commits",
+          description: "List the commits of a pull request",
+          inputSchema: {
+            type: "object",
+            properties: {
+              workspace: { type: "string" },
+              repo_slug: { type: "string" },
+              pr_id: { type: "number", description: "Pull request ID" },
+            },
+            required: ["workspace", "repo_slug", "pr_id"],
+          },
+        },
+        {
+          name: "get_pull_request_activity",
+          description:
+            "Get a pull request's timeline: updates (new commits, title, description or reviewer changes), approvals, change requests and comments. Use it to see what changed since a review.",
+          inputSchema: {
+            type: "object",
+            properties: {
+              workspace: { type: "string" },
+              repo_slug: { type: "string" },
+              pr_id: { type: "number", description: "Pull request ID" },
+              limit: {
+                type: "number",
+                default: 20,
+                description: "Maximum number of entries to return, newest first",
+              },
             },
             required: ["workspace", "repo_slug", "pr_id"],
           },
@@ -273,7 +313,20 @@ class BitbucketServer {
               },
               inline_line: {
                 type: "number",
-                description: "Line number for inline comment (optional)",
+                description:
+                  "Line number for inline comment (optional). With inline_start_line, the last line of the range.",
+              },
+              inline_start_line: {
+                type: "number",
+                description:
+                  "First line of a multi-line inline comment (optional); the range ends at inline_line",
+              },
+              inline_side: {
+                type: "string",
+                enum: ["new", "old"],
+                default: "new",
+                description:
+                  'Which file the line numbers count in: "new" (added or unchanged lines) or "old" (to comment on a deleted line)',
               },
               parent_id: {
                 type: "number",
@@ -298,6 +351,107 @@ class BitbucketServer {
               resolved: { type: "boolean", default: true },
             },
             required: ["workspace", "repo_slug", "pr_id", "comment_id"],
+          },
+        },
+        {
+          name: "update_pull_request_comment",
+          description:
+            "Edit the text of a pull request comment (only its author can)",
+          inputSchema: {
+            type: "object",
+            properties: {
+              workspace: { type: "string" },
+              repo_slug: { type: "string" },
+              pr_id: { type: "number" },
+              comment_id: { type: "number" },
+              body: {
+                type: "string",
+                description: "New comment text (Markdown supported)",
+              },
+            },
+            required: ["workspace", "repo_slug", "pr_id", "comment_id", "body"],
+          },
+        },
+        {
+          name: "delete_pull_request_comment",
+          description: "Delete a pull request comment",
+          inputSchema: {
+            type: "object",
+            properties: {
+              workspace: { type: "string" },
+              repo_slug: { type: "string" },
+              pr_id: { type: "number" },
+              comment_id: { type: "number" },
+            },
+            required: ["workspace", "repo_slug", "pr_id", "comment_id"],
+          },
+        },
+        {
+          name: "list_pull_request_tasks",
+          description:
+            "List the tasks on a pull request, with their state (RESOLVED/UNRESOLVED) and the comment each is attached to",
+          inputSchema: {
+            type: "object",
+            properties: {
+              workspace: { type: "string" },
+              repo_slug: { type: "string" },
+              pr_id: { type: "number" },
+            },
+            required: ["workspace", "repo_slug", "pr_id"],
+          },
+        },
+        {
+          name: "create_pull_request_task",
+          description:
+            "Create a task on a pull request, attached to a comment (comment_id) or to the pull request alone",
+          inputSchema: {
+            type: "object",
+            properties: {
+              workspace: { type: "string" },
+              repo_slug: { type: "string" },
+              pr_id: { type: "number" },
+              content: { type: "string", description: "Task text" },
+              comment_id: {
+                type: "number",
+                description: "ID of the comment to attach the task to (optional)",
+              },
+            },
+            required: ["workspace", "repo_slug", "pr_id", "content"],
+          },
+        },
+        {
+          name: "update_pull_request_task",
+          description:
+            "Edit a pull request task's text, or resolve or reopen it (state)",
+          inputSchema: {
+            type: "object",
+            properties: {
+              workspace: { type: "string" },
+              repo_slug: { type: "string" },
+              pr_id: { type: "number" },
+              task_id: { type: "number" },
+              content: { type: "string", description: "New task text" },
+              state: {
+                type: "string",
+                enum: ["RESOLVED", "UNRESOLVED"],
+                description: "RESOLVED to complete the task, UNRESOLVED to reopen it",
+              },
+            },
+            required: ["workspace", "repo_slug", "pr_id", "task_id"],
+          },
+        },
+        {
+          name: "delete_pull_request_task",
+          description: "Delete a pull request task",
+          inputSchema: {
+            type: "object",
+            properties: {
+              workspace: { type: "string" },
+              repo_slug: { type: "string" },
+              pr_id: { type: "number" },
+              task_id: { type: "number" },
+            },
+            required: ["workspace", "repo_slug", "pr_id", "task_id"],
           },
         },
         {
@@ -346,6 +500,32 @@ class BitbucketServer {
         {
           name: "unapprove_pull_request",
           description: "Remove approval from a pull request",
+          inputSchema: {
+            type: "object",
+            properties: {
+              workspace: { type: "string" },
+              repo_slug: { type: "string" },
+              pr_id: { type: "number", description: "Pull request ID" },
+            },
+            required: ["workspace", "repo_slug", "pr_id"],
+          },
+        },
+        {
+          name: "request_changes_on_pull_request",
+          description: "Request changes on a pull request",
+          inputSchema: {
+            type: "object",
+            properties: {
+              workspace: { type: "string" },
+              repo_slug: { type: "string" },
+              pr_id: { type: "number", description: "Pull request ID" },
+            },
+            required: ["workspace", "repo_slug", "pr_id"],
+          },
+        },
+        {
+          name: "remove_request_changes_on_pull_request",
+          description: "Withdraw your change request on a pull request",
           inputSchema: {
             type: "object",
             properties: {
@@ -515,6 +695,7 @@ class BitbucketServer {
                       args?.workspace as string,
                       args?.repo_slug as string,
                       args?.state as any,
+                      args?.limit as number | undefined,
                     ),
                     null,
                     2,
@@ -586,6 +767,41 @@ class BitbucketServer {
                 },
               ],
             };
+          case "list_pull_request_commits":
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: JSON.stringify(
+                    await this.bitbucket.listPullRequestCommits(
+                      args?.workspace as string,
+                      args?.repo_slug as string,
+                      args?.pr_id as number,
+                    ),
+                    null,
+                    2,
+                  ),
+                },
+              ],
+            };
+          case "get_pull_request_activity":
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: JSON.stringify(
+                    await this.bitbucket.getPullRequestActivity(
+                      args?.workspace as string,
+                      args?.repo_slug as string,
+                      args?.pr_id as number,
+                      args?.limit as number | undefined,
+                    ),
+                    null,
+                    2,
+                  ),
+                },
+              ],
+            };
           case "list_pull_request_comments":
             return {
               content: [
@@ -608,6 +824,8 @@ class BitbucketServer {
               ? {
                   path: args.inline_path as string,
                   line: args.inline_line as number,
+                  start_line: args.inline_start_line as number | undefined,
+                  side: args.inline_side as "new" | "old" | undefined,
                 }
               : undefined;
             return {
@@ -648,6 +866,106 @@ class BitbucketServer {
                   ),
                 },
               ],
+            };
+          case "update_pull_request_comment":
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: JSON.stringify(
+                    await this.bitbucket.updatePullRequestComment(
+                      args?.workspace as string,
+                      args?.repo_slug as string,
+                      args?.pr_id as number,
+                      args?.comment_id as number,
+                      args?.body as string,
+                    ),
+                    null,
+                    2,
+                  ),
+                },
+              ],
+            };
+          case "delete_pull_request_comment":
+            await this.bitbucket.deletePullRequestComment(
+              args?.workspace as string,
+              args?.repo_slug as string,
+              args?.pr_id as number,
+              args?.comment_id as number,
+            );
+            return {
+              content: [{ type: "text", text: "Comment deleted successfully." }],
+            };
+          case "list_pull_request_tasks":
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: JSON.stringify(
+                    await this.bitbucket.listPullRequestTasks(
+                      args?.workspace as string,
+                      args?.repo_slug as string,
+                      args?.pr_id as number,
+                    ),
+                    null,
+                    2,
+                  ),
+                },
+              ],
+            };
+          case "create_pull_request_task":
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: JSON.stringify(
+                    await this.bitbucket.createPullRequestTask(
+                      args?.workspace as string,
+                      args?.repo_slug as string,
+                      args?.pr_id as number,
+                      args?.content as string,
+                      args?.comment_id as number | undefined,
+                    ),
+                    null,
+                    2,
+                  ),
+                },
+              ],
+            };
+          case "update_pull_request_task":
+            return {
+              content: [
+                {
+                  type: "text",
+                  text: JSON.stringify(
+                    await this.bitbucket.updatePullRequestTask(
+                      args?.workspace as string,
+                      args?.repo_slug as string,
+                      args?.pr_id as number,
+                      args?.task_id as number,
+                      {
+                        content: args?.content as string | undefined,
+                        state: args?.state as
+                          | "RESOLVED"
+                          | "UNRESOLVED"
+                          | undefined,
+                      },
+                    ),
+                    null,
+                    2,
+                  ),
+                },
+              ],
+            };
+          case "delete_pull_request_task":
+            await this.bitbucket.deletePullRequestTask(
+              args?.workspace as string,
+              args?.repo_slug as string,
+              args?.pr_id as number,
+              args?.task_id as number,
+            );
+            return {
+              content: [{ type: "text", text: "Task deleted successfully." }],
             };
           case "react_to_pull_request_comment":
             await this.bitbucket.reactToPullRequestComment(
@@ -695,6 +1013,28 @@ class BitbucketServer {
             return {
               content: [
                 { type: "text", text: "Pull request approval removed." },
+              ],
+            };
+          case "request_changes_on_pull_request":
+            await this.bitbucket.requestChangesOnPullRequest(
+              args?.workspace as string,
+              args?.repo_slug as string,
+              args?.pr_id as number,
+            );
+            return {
+              content: [
+                { type: "text", text: "Changes requested on the pull request." },
+              ],
+            };
+          case "remove_request_changes_on_pull_request":
+            await this.bitbucket.removeRequestChangesOnPullRequest(
+              args?.workspace as string,
+              args?.repo_slug as string,
+              args?.pr_id as number,
+            );
+            return {
+              content: [
+                { type: "text", text: "Change request removed from the pull request." },
               ],
             };
           case "merge_pull_request":

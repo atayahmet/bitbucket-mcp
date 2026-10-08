@@ -143,23 +143,33 @@ claude mcp add bitbucket \
 
 ### Pull Request
 
-| Tool                                         | Description                                                                     |
-| -------------------------------------------- | ------------------------------------------------------------------------------- |
-| `create_pull_request`                        | Create a new pull request                                                       |
-| `update_pull_request`                        | Update pull request details (title, description, reviewers, destination branch) |
-| `list_pull_requests`                         | List pull requests in a repository (OPEN, MERGED, DECLINED, SUPERSEDED)         |
-| `get_pull_request`                           | Get details of a specific pull request                                          |
-| `get_pull_request_diff`                      | Get the raw diff output of a pull request                                       |
-| `get_pull_request_diffstat`                  | Get a summary of changed files in a pull request (lines added/removed)          |
-| `list_pull_request_comments`                 | List all comments on a pull request                                             |
-| `add_pull_request_comment`                   | Add a general or inline comment, or a threaded reply (`parent_id`) (Markdown)   |
-| `resolve_pull_request_comment`               | Resolve a comment thread, or reopen it with `resolved: false`                   |
-| `react_to_pull_request_comment`              | Add a reaction (e.g. thumbsup) to a pull request comment                        |
-| `remove_reaction_from_pull_request_comment`  | Remove a reaction from a pull request comment                                   |
-| `approve_pull_request`                       | Approve a pull request                                                          |
-| `unapprove_pull_request`                     | Remove approval from a pull request                                             |
-| `merge_pull_request`                         | Merge a pull request (merge_commit, squash, fast_forward)                       |
-| `decline_pull_request`                       | Decline a pull request                                                          |
+| Tool                                        | Description                                                                                                                 |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `create_pull_request`                       | Create a new pull request                                                                                                   |
+| `update_pull_request`                       | Update pull request details (title, description, reviewers, destination branch)                                             |
+| `list_pull_requests`                        | List a summary of pull requests in a repository (OPEN, MERGED, DECLINED, SUPERSEDED), up to `limit` (default 20)            |
+| `get_pull_request`                          | Get details of a specific pull request                                                                                      |
+| `get_pull_request_diff`                     | Get the raw diff of the changes a pull request makes                                                                        |
+| `get_pull_request_diffstat`                 | Get a summary of changed files in a pull request (lines added/removed)                                                      |
+| `list_pull_request_commits`                 | List the commits of a pull request                                                                                          |
+| `get_pull_request_activity`                 | Get a pull request's timeline: updates, approvals, change requests and comments                                             |
+| `list_pull_request_comments`                | List all comments on a pull request (every page)                                                                            |
+| `add_pull_request_comment`                  | Add a general or inline comment (one line or a range, on the new or old side), or a threaded reply (`parent_id`) (Markdown) |
+| `update_pull_request_comment`               | Edit the text of a pull request comment                                                                                     |
+| `delete_pull_request_comment`               | Delete a pull request comment                                                                                               |
+| `resolve_pull_request_comment`              | Resolve a comment thread, or reopen it with `resolved: false`                                                               |
+| `react_to_pull_request_comment`             | Add a reaction (e.g. thumbsup) to a pull request comment                                                                    |
+| `remove_reaction_from_pull_request_comment` | Remove a reaction from a pull request comment                                                                               |
+| `list_pull_request_tasks`                   | List the tasks on a pull request                                                                                            |
+| `create_pull_request_task`                  | Create a task, attached to a comment (`comment_id`) or to the pull request                                                  |
+| `update_pull_request_task`                  | Edit a task's text, or resolve or reopen it (`state`)                                                                       |
+| `delete_pull_request_task`                  | Delete a pull request task                                                                                                  |
+| `approve_pull_request`                      | Approve a pull request                                                                                                      |
+| `unapprove_pull_request`                    | Remove approval from a pull request                                                                                         |
+| `request_changes_on_pull_request`           | Request changes on a pull request                                                                                           |
+| `remove_request_changes_on_pull_request`    | Withdraw your change request on a pull request                                                                              |
+| `merge_pull_request`                        | Merge a pull request (merge_commit, squash, fast_forward)                                                                   |
+| `decline_pull_request`                      | Decline a pull request                                                                                                      |
 
 ### Commit
 
